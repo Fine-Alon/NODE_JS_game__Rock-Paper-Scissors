@@ -55,9 +55,7 @@ const checkRoundWinner = (userChoiceArr, computerChoiceArr) => {
   const [compNumber, compPicture] = computerChoiceArr
 
   const condition =
-    (userNumber === 3 && compNumber === 2) ||
-    (userNumber === 2 && compNumber === 1) ||
-    (userNumber === 1 && compNumber === 3)
+    (userNumber === 3 && compNumber === 2) || (userNumber === 2 && compNumber === 1) || (userNumber === 1 && compNumber === 3)
 
   console.log("\n\tYou - " + userPicture) // Show comp's choice
   console.log("\n\tBot - " + compPicture) // Show comp's choice
@@ -97,7 +95,17 @@ const roundFrame = counter => {
   console.log(`╰────────────────────────╯\n`)
 }
 
+const showDate = () => {
+  const dateTimeNow = new Date()
+  const readableDate = dateTimeNow.toLocaleString()
+  console.log("\n\n📅", readableDate)
+
+  return dateTimeNow
+}
+
 const initGame = () => {
+  showDate()
+
   let userWins = 0
   let compWins = 0
   let roundCount = 1
