@@ -1,12 +1,15 @@
 const prompt = require("prompt-sync")()
 
+// Define the possible choices
+const options = ["🪨  Rock", "📄  Paper", "✂️  Scissors"]
+
 // NOT in use yet
-const showOptions = () => {
+const showOptions = userName => {
   console.log("\n=========================")
-  console.log("   Choose Your Weapon:   ")
+  console.log(`   Choose Your Weapon (${userName}):   `)
   console.log("=========================")
   console.log("  [1] 🪨  Rock")
-  console.log("  [2] 📄  Paper")
+  console.log("  [2] 📄 Paper")
   console.log("  [3] ✂️  Scissors")
   console.log("=========================\n")
 }
@@ -24,22 +27,17 @@ const getTriesCount = () => {
   }
 }
 
-const getUserChoice = () => {
-  showOptions()
+const getUserChoice = userName => {
+  showOptions(userName)
 
-  // Define the possible choices
-  const options = ["🪨  Rock", "📄  Paper", "✂️  Scissors"]
-
-  const choice = prompt("What is your choice ?  -  ")
+  const choice = prompt(`What is your choice ${userName} ?  -  `)
   const intChoice = Number(choice)
 
   return [intChoice, options[intChoice - 1]]
-  return
 }
 
 const getComputerChoice = () => {
   // Define the possible choices
-  const options = ["🪨  Rock", "📄  Paper", "✂️  Scissors"]
 
   // Get random number
   const randomIndex = Math.floor(Math.random() * options.length)
@@ -47,7 +45,7 @@ const getComputerChoice = () => {
   return [randomIndex + 1, options[randomIndex]]
 }
 
-const checkRoundWinner = (userChoiceArr, computerChoiceArr) => {
+const checkRoundWinner = (userName, userChoiceArr, computerChoiceArr) => {
   let isRepeat = true
   let isUserWon = true
 
@@ -57,7 +55,7 @@ const checkRoundWinner = (userChoiceArr, computerChoiceArr) => {
   const condition =
     (userNumber === 3 && compNumber === 2) || (userNumber === 2 && compNumber === 1) || (userNumber === 1 && compNumber === 3)
 
-  console.log("\n\tYou - " + userPicture) // Show comp's choice
+  console.log(`\n\t${userName} - ` + userPicture) // Show comp's choice
   console.log("\n\tBot - " + compPicture) // Show comp's choice
 
   // If 2 choices are the same return TRUE (for repeating)
@@ -79,20 +77,28 @@ const checkGameEnd = (userWins, compWins) => {
   return null // if no winner yet return null
 }
 
-const viewScore = (userWins, compWins) => {
-  console.log("\n        ╭─────────────╮")
-  console.log("        │  YOU ┆ BOT  │")
-  console.log(`        │   ${userWins}  ┆  ${compWins}   │`)
-  console.log("        ╰─────────────╯")
-  console.log(`\n────────────────────────────────────────`)
-}
+const viewScore = (userName, userWins, compWins) => {
+  // Calculate the required width for the left column
+  const leftWidth = Math.max(userName.length + 2, 5)
+  const rightWidth = 5 // Fixed width for BOT
 
-const roundFrame = counter => {
-  // 3. ROUND START FRAME (Prints at the top of every loop)
-  console.log(`\n╭────────────────────────╮`)
-  // We use some spacing to make the round number look centered
-  console.log(`│        ROUND ${counter}         │`)
-  console.log(`╰────────────────────────╯\n`)
+  // helper function to center the text inside the columns
+  const centerText = (text, width) => {
+    const str = String(text)
+    const padTotal = width - str.length
+    const padLeft = " ".repeat(Math.floor(padTotal / 2))
+    const padRight = " ".repeat(padTotal - Math.floor(padTotal / 2))
+    return padLeft + str + padRight
+  }
+
+  // Calculate the total width of the roof and floor of the box
+  const totalWidth = leftWidth + 3 + rightWidth // +3 is for the " ┆ " separator
+
+  // 4. Draw the dynamic box using .repeat()
+  console.log(`\n        ╭${"─".repeat(totalWidth)}╮`)
+  console.log(`        │${centerText(userName, leftWidth)} ┆ ${centerText("BOT", rightWidth)}│`)
+  console.log(`        │${centerText(userWins, leftWidth)} ┆ ${centerText(compWins, rightWidth)}│`)
+  console.log(`        ╰${"─".repeat(totalWidth)}╯\n`)
 }
 
 const showDate = () => {
@@ -101,6 +107,14 @@ const showDate = () => {
   console.log("\n\n📅", readableDate)
 
   return dateTimeNow
+}
+
+const roundFrame = counter => {
+  // ROUND START FRAME (Prints at the top of every loop)
+  console.log(`\n╭────────────────────────╮`)
+  // We use some spacing to make the round number look centered
+  console.log(`│        ROUND ${counter}         │`)
+  console.log(`╰────────────────────────╯\n`)
 }
 
 const initGame = () => {
@@ -114,21 +128,25 @@ const initGame = () => {
   console.log("║            🚀 GAME START! 🚀           ║")
   console.log("╚════════════════════════════════════════╝")
 
-  return [userWins, compWins, roundCount]
+  console.log("\n\t")
+
+  const userName = prompt("Enter players name:  ")
+
+  return [userName, userWins, compWins, roundCount]
 }
 
 const playGame = () => {
-  let [userWins, compWins, roundCount] = initGame()
+  let [userName, userWins, compWins, roundCount] = initGame()
 
   while (true) {
     roundFrame(roundCount)
 
-    const userChoice = getUserChoice()
+    const userChoice = getUserChoice(userName)
     const computerChoice = getComputerChoice()
 
-    const [isRepeat, isUserWon] = checkRoundWinner(userChoice, computerChoice)
+    const [isRepeat, isUserWon] = checkRoundWinner(userName, userChoice, computerChoice)
     if (isRepeat) {
-      viewScore(userWins, compWins)
+      viewScore(userName, userWins, compWins)
       roundCount++
       continue
     }
@@ -137,7 +155,7 @@ const playGame = () => {
     if (isUserWon) userWins++
     else compWins++
 
-    viewScore(userWins, compWins)
+    viewScore(userName, userWins, compWins)
 
     // check if there is winner
     const winnerMsg = checkGameEnd(userWins, compWins)
