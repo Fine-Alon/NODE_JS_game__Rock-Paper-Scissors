@@ -1,40 +1,8 @@
 const prompt = require("prompt-sync")()
-
-// Define the possible choices
-const options = ["🪨  Rock", "📄  Paper", "✂️  Scissors"]
-
-// NOT in use yet
-const showOptions = userName => {
-  console.log("\n=========================")
-  console.log(`   Choose Your Weapon (${userName}):   `)
-  console.log("=========================")
-  console.log("  [1] 🪨  Rock")
-  console.log("  [2] 📄 Paper")
-  console.log("  [3] ✂️  Scissors")
-  console.log("=========================\n")
-}
-
-const getTriesCount = () => {
-  while (true) {
-    const triesCount = prompt("How much rounds you wish? (3 - 10)times  -  ")
-
-    if (triesCount < 3 || triesCount > 10) {
-      console.log("Number of rounds is not legal! Try again")
-    } else {
-      return Number(triesCount)
-      break
-    }
-  }
-}
-
-const getUserChoice = userName => {
-  showOptions(userName)
-
-  const choice = prompt(`What is your choice ${userName} ?  -  `)
-  const intChoice = Number(choice)
-
-  return [intChoice, options[intChoice - 1]]
-}
+const { optionsTools: options } = require("./settings")
+const { showDate, viewScore, showOptions, startGameBanner } = require("./UI/ui_cli")
+const { isNameValid } = require("./validators/validators")
+const { getUserChoice } = require("./logic/logic")
 
 const getComputerChoice = () => {
   // Define the possible choices
@@ -77,38 +45,6 @@ const checkGameEnd = (userWins, compWins) => {
   return null // if no winner yet return null
 }
 
-const viewScore = (userName, userWins, compWins) => {
-  // Calculate the required width for the left column
-  const leftWidth = Math.max(userName.length + 2, 5)
-  const rightWidth = 5 // Fixed width for BOT
-
-  // helper function to center the text inside the columns
-  const centerText = (text, width) => {
-    const str = String(text)
-    const padTotal = width - str.length
-    const padLeft = " ".repeat(Math.floor(padTotal / 2))
-    const padRight = " ".repeat(padTotal - Math.floor(padTotal / 2))
-    return padLeft + str + padRight
-  }
-
-  // Calculate the total width of the roof and floor of the box
-  const totalWidth = leftWidth + 3 + rightWidth // +3 is for the " ┆ " separator
-
-  // 4. Draw the dynamic box using .repeat()
-  console.log(`\n        ╭${"─".repeat(totalWidth)}╮`)
-  console.log(`        │${centerText(userName, leftWidth)} ┆ ${centerText("BOT", rightWidth)}│`)
-  console.log(`        │${centerText(userWins, leftWidth)} ┆ ${centerText(compWins, rightWidth)}│`)
-  console.log(`        ╰${"─".repeat(totalWidth)}╯\n`)
-}
-
-const showDate = () => {
-  const dateTimeNow = new Date()
-  const readableDate = dateTimeNow.toLocaleString()
-  console.log("\n\n📅", readableDate)
-
-  return dateTimeNow
-}
-
 const roundFrame = counter => {
   // ROUND START FRAME (Prints at the top of every loop)
   console.log(`\n╭────────────────────────╮`)
@@ -124,15 +60,15 @@ const initGame = () => {
   let compWins = 0
   let roundCount = 1
 
-  console.log("\n╔════════════════════════════════════════╗")
-  console.log("║            🚀 GAME START! 🚀           ║")
-  console.log("╚════════════════════════════════════════╝")
+  startGameBanner()
 
-  console.log("\n\t")
+  while (true) {
+    const userName = prompt("Enter players name:  ")
 
-  const userName = prompt("Enter players name:  ")
-
-  return [userName, userWins, compWins, roundCount]
+    if (isNameValid(userName)) {
+      return [userName, userWins, compWins, roundCount]
+    }
+  }
 }
 
 const playGame = () => {
